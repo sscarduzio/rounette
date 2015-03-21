@@ -1,122 +1,152 @@
 
 <!--[if IE]><script type="text/javascript" src="/sites/default/files/1010/source/excanvas.js"></script><![endif]-->
 <input type="button" value="spin" onclick="spin();" style="float: left;" />
-<canvas id="wheelcanvas" width="500" height="500"></canvas>
+<canvas id="wheelcanvas" ></canvas>
 <script type="application/javascript">
-  var colors = ["#E33", "#333"];
-  var cellText = ["GORE", "CUTE"]  
-  var startAngle = 0;
-  var arc = Math.PI / 6;
-  var spinTimeout = null;
-  
-  var spinArcStart = 10;
-  var spinTime = 0;
-  var spinTimeTotal = 0;
-  
-  var ctx;
-  
-  function draw() {
-    drawRouletteWheel();
-  }
-  
-  var canvas = document.getElementById("wheelcanvas");
-  
-  function drawRouletteWheel() {
-    if (canvas.getContext) {
-      var outsideRadius = 200;
-      var textRadius = 160;
-      var insideRadius = 125;
-      
-      ctx = canvas.getContext("2d");
-      ctx.clearRect(0,0,500,500);
-      
-      
-      ctx.strokeStyle = "black";
-      ctx.lineWidth = 2;
-      
-      ctx.font = 'bold 16px sans-serif';
-      drawMiddle("SPIN!");
 
-      for(var i = 0; i < 12; i++) {
+var colors = ["#E33", "#333"];
+var cellText = ["GORE", "CUTE"]
+
+var startAngle = 0;
+var arc = Math.PI / 6;
+var spinTimeout = null;
+var spinArcStart = 10;
+var spinTime = 0;
+var spinTimeTotal = 0;
+
+var ctx;
+
+function draw() {
+    drawRouletteWheel();
+}
+
+var canvas = document.getElementById("wheelcanvas");
+
+var half;
+var wheel_YOff;
+
+function resizeCanvas() {
+    canvas.width = document.body.clientWidth;
+    canvas.height = document.body.clientHeight;
+    //half = Math.min(canvas.height, canvas.width) / 2;
+    half = canvas.width / 2;
+    wheel_YOff = canvas.height - 90;
+
+    draw();
+}
+resizeCanvas()
+window.addEventListener('resize', resizeCanvas, false);
+
+function drawRouletteWheel() {
+    if (!canvas.getContext) {
+        console.log("no context!");
+    }
+
+    var outsideRadius = half * 0.99;
+    var textRadius = outsideRadius * 0.93;
+    var insideRadius = outsideRadius * 0.90;
+
+    ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 2;
+
+    drawMiddle("SPIN!");
+    drawMiddle("NASP!");
+
+    ctx.font = 'bold ' + Math.round(half * 0.064) + 'px sans-serif';
+
+    for (var i = 0; i < 12; i++) {
         var angle = startAngle + i * arc;
         ctx.fillStyle = colors[i % 2];
-        
+
         ctx.beginPath();
-        ctx.arc(250, 250, outsideRadius, angle, angle + arc, false);
-        ctx.arc(250, 250, insideRadius, angle + arc, angle, true);
+        ctx.arc(half, wheel_YOff, outsideRadius, angle, angle + arc, false);
+        ctx.arc(half, wheel_YOff, insideRadius, angle + arc, angle, true);
         ctx.stroke();
         ctx.fill();
-        
+
         ctx.save();
         ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.shadowBlur    = 0;
-        ctx.shadowColor   = "rgb(220,220,220)";
+        ctx.shadowOffsetY = 1;
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = "rgb(100,100,100)";
         ctx.fillStyle = colors[(i + 1) % 2];
-        ctx.translate(250 + Math.cos(angle + arc / 2) * textRadius, 250 + Math.sin(angle + arc / 2) * textRadius);
+        ctx.translate(half + Math.cos(angle + arc / 2) * textRadius, wheel_YOff + Math.sin(angle + arc / 2) * textRadius);
         ctx.rotate(angle + arc / 2 + Math.PI / 2);
         var text = cellText[i % 2];
         ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
         ctx.restore();
-      } 
-      
-      //Arrow
-      ctx.fillStyle = "#999";
-      ctx.beginPath();
-      ctx.moveTo(250 - 4, 250 - (outsideRadius + 5));
-      ctx.lineTo(250 + 4, 250 - (outsideRadius + 5));
-      ctx.lineTo(250 + 4, 250 - (outsideRadius - 5));
-      ctx.lineTo(250 + 9, 250 - (outsideRadius - 5));
-      ctx.lineTo(250 + 0, 250 - (outsideRadius - 13));
-      ctx.lineTo(250 - 9, 250 - (outsideRadius - 5));
-      ctx.lineTo(250 - 4, 250 - (outsideRadius - 5));
-      ctx.lineTo(250 - 4, 250 - (outsideRadius + 5));
-      ctx.fill();
     }
-  }
-  
-  function spin() {
+
+    //Arrow
+    ctx.fillStyle = "#999";
+    ctx.beginPath();
+    ctx.moveTo(half - 4, wheel_YOff - (outsideRadius + 5));
+    ctx.lineTo(half + 4, wheel_YOff - (outsideRadius + 5));
+    ctx.lineTo(half + 4, wheel_YOff - (outsideRadius - 5));
+    ctx.lineTo(half + 9, wheel_YOff - (outsideRadius - 5));
+    ctx.lineTo(half + 0, wheel_YOff - (outsideRadius - 13));
+    ctx.lineTo(half - 9, wheel_YOff - (outsideRadius - 5));
+    ctx.lineTo(half - 4, wheel_YOff - (outsideRadius - 5));
+    ctx.lineTo(half - 4, wheel_YOff - (outsideRadius + 5));
+    ctx.fill();
+
+}
+
+function spin() {
     spinAngleStart = Math.random() * 10 + 10;
     spinTime = 0;
     spinTimeTotal = Math.random() * 3 + 4 * 1000;
     rotateWheel();
-  }
-  
-  function rotateWheel() {
-    spinTime += 15;
-    if(spinTime >= spinTimeTotal) {
-      stopRotateWheel();
-      return;
+}
+
+function rotateWheel() {
+    spinTime += 45;
+    if (spinTime >= spinTimeTotal) {
+        stopRotateWheel();
+        return;
     }
     var spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
     startAngle += (spinAngle * Math.PI / 180);
     drawRouletteWheel();
     spinTimeout = setTimeout('rotateWheel()', 30);
-  }
-  
-  function stopRotateWheel() {
+}
+
+function stopRotateWheel() {
     clearTimeout(spinTimeout);
     var degrees = startAngle * 180 / Math.PI + 90;
     var arcd = arc * 180 / Math.PI;
     var index = Math.floor((360 - degrees % 360) / arcd);
     ctx.save();
-    drawMiddle(cellText[index%2])
     ctx.restore();
-  }
+    drawMiddle(cellText[index % 2]);
+}
 
-  function drawMiddle(text) {
-    ctx.clearRect(250-80, 250-80, 160, 160)
-    ctx.font = 'bold 25px sans-serif';
-    ctx.fillText(text, 250 - ctx.measureText(text).width / 2, 250 + 10);
-  }
+function drawMiddle(text) {
+  ctx.save();
+  var textW = ctx.measureText(text).width;
+  var textH = Math.round(half * 0.064);
+  var textBox_xOff = canvas.width/2 -  textW;
+  var textBox_yOff = canvas.height - textH;
+  ctx.fillStyle = "red";
+  ctx.clearRect(textBox_xOff-textW, textBox_yOff-textH, textW+2, textH+2);
 
-  function easeOut(t, b, c, d) {
-    var ts = (t/=d)*t;
-    var tc = ts*t;
-    return b+c*(tc + -3*ts + 3*t);
-  }
-  
-  draw();
+  ctx.fillStyle = "#999";
+  ctx.font = 'bold ' + textH + 'px sans-serif';
+  ctx.fillText(text, textBox_xOff, textBox_yOff);
+  ctx.restore();
+}
+
+function easeOut(t, b, c, d) {
+    var ts = (t /= d) * t;
+    var tc = ts * t;
+    return b + c * (tc + -3 * ts + 3 * t);
+}
+
+draw();
 </script>
 <style type="text/css">
   body {
